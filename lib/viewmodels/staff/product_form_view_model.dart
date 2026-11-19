@@ -45,6 +45,9 @@ class ProductFormViewModel extends ViewModel {
 
   /// The product before editing (its stock is not changed here).
   Product? original;
+
+  /// Its cost price (staff only), loaded with it.
+  int? originalCostSen;
   bool loading;
 
   /// Loads the product being edited; null when it no longer exists. Called
@@ -54,6 +57,7 @@ class ProductFormViewModel extends ViewModel {
       final p = await _products.findByBarcode(editBarcode!);
       if (p != null) {
         original = p;
+        originalCostSen = await _products.getCostPrice(p.barcode);
         category = productCategories.contains(p.category)
             ? p.category
             : 'Others';
@@ -106,6 +110,7 @@ class ProductFormViewModel extends ViewModel {
     required String name,
     required String description,
     required int priceSen,
+    required int? costPriceSen,
     required int? saveFoodPriceSen,
     required int lowStockThreshold,
     required int openingStock,
@@ -125,9 +130,14 @@ class ProductFormViewModel extends ViewModel {
       isActive: isActive,
     );
     if (isNew) {
-      await _products.createProduct(product, staffId: _staffId, source: source);
+      await _products.createProduct(
+        product,
+        staffId: _staffId,
+        source: source,
+        costPriceSen: costPriceSen,
+      );
     } else {
-      await _products.updateProduct(product);
+      await _products.updateProduct(product, costPriceSen: costPriceSen);
     }
     return product;
   });

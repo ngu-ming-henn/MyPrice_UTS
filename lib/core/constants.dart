@@ -30,6 +30,18 @@ class AppRules {
 
   /// Opening time shown on the map screen (agree with the koperasi).
   static const openingHour = 8;
+
+  /// Days the koperasi opens (DateTime.monday = 1 ... sunday = 7). The
+  /// restock plan only counts sales on these days.
+  static const openWeekdays = {1, 2, 3, 4, 5};
+
+  /// The restock plan orders enough stock for this many days (until the
+  /// supplier comes again).
+  static const restockCoverDays = 7;
+
+  /// Days of closing history used for the restock plan and the week
+  /// comparison.
+  static const historyDays = 120;
 }
 
 /// Where the koperasi is: the "UCTS COOP SHOP" under the stairs at the
@@ -116,6 +128,43 @@ class OrderType {
   OrderType._();
   static const preorder = 'preorder';
   static const counter = 'counter';
+}
+
+/// How a sale was paid, chosen by staff when they take the money.
+class PaymentMethod {
+  PaymentMethod._();
+  static const cash = 'cash';
+
+  /// DuitNow QR: the money goes to the koperasi's bank, not the drawer.
+  static const qr = 'qr';
+
+  /// English label (translated with tr); null = recorded before the app
+  /// asked how.
+  static String label(String? method) => switch (method) {
+    cash => 'Cash',
+    qr => 'DuitNow QR',
+    _ => 'Paid at counter',
+  };
+}
+
+/// What kind of week it is on campus (Campus calendar). Sales change a lot
+/// between them, so the restock plan compares weeks of the same kind.
+class WeekType {
+  WeekType._();
+  static const normal = 'normal';
+  static const exam = 'exam';
+  static const semesterBreak = 'break';
+  static const event = 'event';
+
+  static const all = [normal, exam, semesterBreak, event];
+
+  /// English label (translated with tr).
+  static String label(String type) => switch (type) {
+    exam => 'Exam week',
+    semesterBreak => 'Semester break',
+    event => 'Event week',
+    _ => 'Normal week',
+  };
 }
 
 class CancelReason {

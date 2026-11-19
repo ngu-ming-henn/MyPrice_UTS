@@ -58,6 +58,7 @@ class Order {
     required this.noPlasticBag,
     required this.pickupCode,
     required this.pointsEarned,
+    this.paymentMethod,
     this.handledBy,
     this.cancelReason,
     this.createdAt,
@@ -75,6 +76,10 @@ class Order {
   final bool noPlasticBag;
   final String? pickupCode;
   final int pointsEarned;
+
+  /// See PaymentMethod; null = not paid yet, or paid before the app
+  /// recorded how (counted as cash).
+  final String? paymentMethod;
   final String? handledBy;
   final String? cancelReason; // see CancelReason, set by staff only
   final DateTime? createdAt; // null while the server timestamp is pending
@@ -88,6 +93,12 @@ class Order {
   bool get isCancelled => status == OrderStatus.cancelled;
   bool get wasNotCollected =>
       isCancelled && cancelReason == CancelReason.notCollected;
+
+  /// Paid by DuitNow QR (everything else goes into the cash drawer).
+  bool get paidByQr => paymentMethod == PaymentMethod.qr;
+
+  /// When the money was taken; for sales and the day's closing.
+  DateTime get paidTime => collectedAt ?? sortTime;
 
   int get itemCount => items.fold(0, (total, i) => total + i.qty);
   int get saveFoodItemCount => saveFoodCountOf(items);
@@ -141,6 +152,7 @@ class Order {
       noPlasticBag: d['noPlasticBag'] as bool? ?? false,
       pickupCode: d['pickupCode'] as String?,
       pointsEarned: readInt(d['pointsEarned']),
+      paymentMethod: d['paymentMethod'] as String?,
       handledBy: d['handledBy'] as String?,
       cancelReason: d['cancelReason'] as String?,
       createdAt: readDate(d['createdAt']),

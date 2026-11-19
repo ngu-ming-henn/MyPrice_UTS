@@ -37,11 +37,41 @@ class MoreScreen extends StatelessWidget {
           context,
           result.added > 0
               ? context.tr('Added {count} products.', {'count': result.added})
-              : result.described > 0
-              ? context.tr('Added descriptions to {count} products.', {
-                  'count': result.described,
+              : result.described + result.costed > 0
+              ? context.tr('Updated {count} sample products.', {
+                  'count': result.described + result.costed,
                 })
               : context.tr('Sample products already loaded.'),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
+  Future<void> _seedHistory(BuildContext context) async {
+    final vm = context.read<MoreViewModel>();
+    final ok = await confirm(
+      context,
+      title: context.tr('Load sample sales history?'),
+      message: context.tr(
+        'Adds 8 weeks of sample closed days (marked "Sample") and marks a '
+        'semester break, an exam week and an event week in the Campus '
+        'calendar, plus an exam week next week. Load the sample products '
+        'first. Days you closed yourself are kept.',
+      ),
+      confirmLabel: context.tr('Load'),
+      cancelLabel: context.tr('Cancel'),
+    );
+    if (!ok || !context.mounted) return;
+    try {
+      final added = await vm.loadSampleHistory();
+      if (context.mounted) {
+        showSnack(
+          context,
+          context.tr('Added {count} sample days. Open the Money tab.', {
+            'count': added,
+          }),
         );
       }
     } catch (e) {
@@ -100,6 +130,37 @@ class MoreScreen extends StatelessWidget {
             child: Column(
               children: [
                 tile(
+                  Icons.lock_clock,
+                  'Close shop',
+                  'Count the cash and save the day',
+                  () => context.push('/staff/close'),
+                ),
+                tile(
+                  Icons.local_shipping_outlined,
+                  'Restock plan',
+                  'What to order for the coming week',
+                  () => context.push('/staff/restock'),
+                ),
+                tile(
+                  Icons.calendar_month,
+                  'Campus calendar',
+                  'Mark exam weeks, semester breaks and events',
+                  () => context.push('/staff/calendar'),
+                ),
+                tile(
+                  Icons.bar_chart,
+                  'Sales & sustainability report',
+                  'Sales chart, top products, green impact',
+                  () => context.push('/staff/reports'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Column(
+              children: [
+                tile(
                   Icons.inventory_2_outlined,
                   'Products',
                   'Add, edit, disable',
@@ -135,6 +196,13 @@ class MoreScreen extends StatelessWidget {
                   'Load sample products',
                   'For testing and the demo',
                   () => _seed(context),
+                  color: const Color(0xFF1565C0),
+                ),
+                tile(
+                  Icons.history,
+                  'Load sample sales history',
+                  'For the Money tab and the restock plan demo',
+                  () => _seedHistory(context),
                   color: const Color(0xFF1565C0),
                 ),
                 tile(

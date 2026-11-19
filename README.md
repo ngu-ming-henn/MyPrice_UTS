@@ -29,6 +29,21 @@ Team **Sustainable Smart Campus**. The build guide is `MAD_SmartShop_App_Develop
 | C4 | English / Bahasa Melayu, plus light / dark mode | Profile → Preferences |
 | Extra | Profile: edit name, ID and phone; change password (with strength line); member QR | Profile |
 
+### Owner features (money and planning)
+
+The koperasi has one owner who also runs the counter, so these are added to the staff side (no new role).
+
+| # | Feature | Where |
+|---|---|---|
+| O1 | **Cost price** for each product, with a live "Profit RM 0.60 per item (30%)" line. Stored in `product_costs`, which only staff can read, so students never see the margins | Products → edit |
+| O2 | **Cash or DuitNow QR** chosen when the money is taken, shown on the receipt | Counter sale, Orders → Collect |
+| O3 | **Close shop**: count the drawer note by note (RM100 … RM1 + coins), compare with float + cash sales, save the day's summary (`closings/{yyyy-MM-dd}`) | Dashboard card, More |
+| O4 | **6 pm reminder** "Time to close shop", every day, even when the app is closed | `services/notification_service.dart` |
+| O5 | **Money tab**: sales, cost and profit for today / 7 / 30 days, daily profit chart, the products that earn the most and the least, waste vs Save Food, closing history with short-cash days flagged | Money tab (Reports moved to the 📊 button and More) |
+| O6 | ⭐ **Campus calendar**: mark weeks as Normal / Exam / Semester break / Event (`calendar/{monday}`) | More → Campus calendar |
+| O7 | ⭐ **AI Restock plan**: learns sales per day for each kind of campus week from the closed days, looks up the coming week in the calendar, takes off pre-orders not packed yet, and suggests how many to order. One tap sends the list on WhatsApp | Dashboard card, More |
+| O8 | **Campus weeks compared**: profit per day in exam weeks, breaks and event weeks vs a normal week | Money tab |
+
 Not in this version: C3 (CSV import).
 
 **Translations:** English text in the code is the key; the Malay is in `lib/l10n/malay.dart`. Use `context.tr('...')` for new text. `test/translations_test.dart` fails if a text has no Malay entry.
@@ -88,7 +103,7 @@ Users can't make themselves staff, because the security rules block it.
 1. Register in the app like a student, or add a user in the Console under **Authentication**.
 2. In **Firestore → users → {uid}**, change `role` from `student` to `staff`.
 3. Log in again. You land on the Staff Dashboard.
-4. Go to **More → Load sample products** to add 28 demo products. They use GS1 "200" in-store barcodes, so they never clash with real products, and come with a starting `soldCount` so "Popular now" and the AI Budget Planner have data. To use real products, scan their barcodes from **Products → Add product**.
+4. Go to **More → Load sample products** to add the demo products (with cost prices). They use GS1 "200" in-store barcodes, so they never clash with real products, and come with a starting `soldCount` so "Popular now" and the AI Budget Planner have data. To use real products, scan their barcodes from **Products → Add product**. Then **More → Load sample sales history** adds 8 weeks of sample closed days (marked "Sample"), a semester break, an exam week and an event week in the Campus calendar, and an exam week next week, so the Money tab and the restock plan have data for the demo.
 
 ### 4. Run on a phone
 Turn on USB debugging, plug the phone in, then run `flutter run`. Use a real phone for scanning, because the emulator camera is limited. For the demo, use one phone logged in as **staff** and one as a **student**.
@@ -102,6 +117,10 @@ flutter run --dart-define=USE_FIREBASE_EMULATOR=true
 This uses the Firebase Local Emulator Suite with the real `firestore.rules`. The emulator UI is at http://localhost:4000, where you can set a user's `role` to `staff`. Debug builds allow plain HTTP to `10.0.2.2`/`localhost` for this (`android/app/src/debug/res/xml/network_security_config.xml`). Release builds don't.
 
 ## Design notes
+- **Owner data is staff only.** `product_costs`, `closings` and `calendar` can only be read and written by staff (`firestore.rules`). Run `firebase deploy --only firestore:rules` after updating, or these screens show "You do not have permission".
+- **A closed day is the record.** Close shop saves the day's totals and a short line per product. The Money tab uses the saved summary for days already closed and adds up the orders only for today (and days that were not closed). The restock plan and the week comparison read one document per day, which keeps Firestore reads low on the Spark plan.
+- **Expected cash** = float + cash sales (orders paid in cash, or collected before the app asked how). DuitNow QR goes to the bank, so it is not in the drawer.
+- **Restock plan:** for each of the next `AppRules.restockCoverDays` (7) days the koperasi is open (`AppRules.openWeekdays`, Mon–Fri), it uses the product's sales per day in that kind of campus week (or all weeks if there is no history for that kind). Order = expected sales + low-stock level − (stock − pending pre-orders).
 - **Money is stored in sen** (integers), so RM18.50 is stored as `1850`.
 - **Product document ID = barcode.** Items without a barcode get `SK-000123` and a printable QR label.
 - **Stock only changes through `StockService` / `OrderService`**, and every change writes a `stock_movements` entry. Sales and packed pre-orders also add to `soldCount` (the AI Budget Planner's popularity score); a cancelled packed order takes it back off.

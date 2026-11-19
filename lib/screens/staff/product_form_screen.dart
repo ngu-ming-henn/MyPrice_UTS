@@ -27,6 +27,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _name = TextEditingController();
   final _description = TextEditingController();
   final _price = TextEditingController();
+  final _cost = TextEditingController();
   final _saveFoodPrice = TextEditingController();
   final _threshold = TextEditingController(
     text: '${AppRules.defaultLowStockThreshold}',
@@ -55,6 +56,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _name,
       _description,
       _price,
+      _cost,
       _saveFoodPrice,
       _threshold,
       _imageUrl,
@@ -78,6 +80,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _name.text = p.name;
       _description.text = p.description ?? '';
       _price.text = senToInput(p.priceSen);
+      final cost = _vm.originalCostSen;
+      _cost.text = cost == null ? '' : senToInput(cost);
       _saveFoodPrice.text = p.saveFoodPriceSen == null
           ? ''
           : senToInput(p.saveFoodPriceSen!);
@@ -158,6 +162,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         name: _name.text,
         description: _description.text,
         priceSen: parseRMToSen(_price.text)!,
+        costPriceSen: _cost.text.trim().isEmpty
+            ? null
+            : parseRMToSen(_cost.text),
         saveFoodPriceSen: _saveFoodPrice.text.trim().isEmpty
             ? null
             : parseRMToSen(_saveFoodPrice.text),
@@ -184,6 +191,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     } catch (e) {
       if (mounted) showError(context, e);
     }
+  }
+
+  /// "Profit RM 0.60 per item (32%)" under the prices.
+  String _profitHint(BuildContext context) {
+    final price = parseRMToSen(_price.text);
+    final cost = parseRMToSen(_cost.text);
+    if (price == null || price <= 0 || cost == null) {
+      return context.tr(
+        'Cost price: what you pay the supplier. Only staff can see it.',
+      );
+    }
+    return context.tr('Profit {profit} per item ({pct}%)', {
+      'profit': formatRM(price - cost),
+      'pct': ((price - cost) * 100 / price).round(),
+    });
   }
 
   String? _validatePrice(String? v) {
@@ -275,6 +297,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   ),
                   const SizedBox(height: 12),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: TextFormField(
@@ -292,20 +315,47 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextFormField(
-                          controller: _threshold,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          decoration: InputDecoration(
-                            labelText: context.tr('Low-stock alert at'),
+                          controller: _cost,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
-                          validator: (v) => int.tryParse(v ?? '') == null
-                              ? context.tr('Enter a number')
-                              : null,
+                          decoration: InputDecoration(
+                            labelText: context.tr('Cost price'),
+                            prefixText: 'RM ',
+                          ),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return null;
+                            final sen = parseRMToSen(v);
+                            return sen == null || sen <= 0
+                                ? context.tr('Enter a price or leave empty')
+                                : null;
+                          },
                         ),
                       ),
                     ],
+                  ),
+                  // Live profit per item as the prices are typed.
+                  ListenableBuilder(
+                    listenable: Listenable.merge([_price, _cost]),
+                    builder: (context, _) => Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                      child: Text(
+                        _profitHint(context),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _threshold,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: InputDecoration(
+                      labelText: context.tr('Low-stock alert at'),
+                    ),
+                    validator: (v) => int.tryParse(v ?? '') == null
+                        ? context.tr('Enter a number')
+                        : null,
                   ),
                   if (isNew) ...[
                     const SizedBox(height: 12),

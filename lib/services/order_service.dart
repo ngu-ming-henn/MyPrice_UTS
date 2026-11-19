@@ -63,6 +63,13 @@ class OrderService {
       .snapshots()
       .map((s) => s.docs.map(Order.fromDoc).toList());
 
+  /// Orders paid (collected) since [since]: the money taken, for the day's
+  /// closing and the Money screen.
+  Stream<List<Order>> watchCollectedSince(DateTime since) => _orders
+      .where('collectedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
+      .snapshots()
+      .map((s) => s.docs.map(Order.fromDoc).toList());
+
   Future<Order?> findByPickupCode(String code) async {
     final snap = await _orders
         .where('pickupCode', isEqualTo: code.trim().toUpperCase())
@@ -158,8 +165,13 @@ class OrderService {
     });
   }
 
-  /// Staff scanned the pickup QR: READY -> COLLECTED, green points added.
-  Future<void> markCollected(String orderId, {required String staffId}) async {
+  /// Staff scanned the pickup QR and took the money ([paymentMethod]):
+  /// READY -> COLLECTED, green points added.
+  Future<void> markCollected(
+    String orderId, {
+    required String staffId,
+    required String paymentMethod,
+  }) async {
     final orderRef = _orders.doc(orderId);
     await _db.runTransaction((tx) async {
       final snap = await tx.get(orderRef);
@@ -168,6 +180,7 @@ class OrderService {
       if (!order.isReady) throw AppException(notReadyMessage(order));
       tx.update(orderRef, {
         'status': OrderStatus.collected,
+        'paymentMethod': paymentMethod,
         'handledBy': staffId,
         'collectedAt': FieldValue.serverTimestamp(),
       });
@@ -282,6 +295,7 @@ class OrderService {
     required List<OrderItem> requested,
     required String staffId,
     required bool noPlasticBag,
+    required String paymentMethod,
     AppUser? member,
   }) async {
     if (requested.isEmpty) throw const AppException('No items scanned.');
@@ -317,6 +331,7 @@ class OrderService {
         'noPlasticBag': noPlasticBag,
         'pickupCode': null,
         'pointsEarned': points,
+        'paymentMethod': paymentMethod,
         'handledBy': staffId,
         'createdAt': FieldValue.serverTimestamp(),
         'readyAt': null,

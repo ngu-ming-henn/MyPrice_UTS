@@ -69,13 +69,14 @@ class CounterSaleViewModel extends ViewModel {
     notify();
   }
 
-  /// Records the sale (stock deducted, points for a member); returns the
-  /// order id for the receipt.
-  Future<String> checkout() => run(() async {
+  /// Records the sale paid by [paymentMethod] (stock deducted, points for
+  /// a member); returns the order id for the receipt.
+  Future<String> checkout(String paymentMethod) => run(() async {
     final orderId = await _orders.counterSale(
       requested: cart.toOrderItems(),
       staffId: _staffId,
       noPlasticBag: cart.noPlasticBag,
+      paymentMethod: paymentMethod,
       member: member,
     );
     cart.clear();

@@ -60,6 +60,19 @@ service cloud.firestore {
       allow read, write: if isStaff();
     }
 
+    // Owner only: cost prices are kept out of `products` so students never
+    // see the koperasi's margins; the daily closings (cash count, profit)
+    // and the Campus calendar (exam / break / event weeks).
+    match /product_costs/{barcode} {
+      allow read, write: if isStaff();
+    }
+    match /closings/{day} {
+      allow read, write: if isStaff();
+    }
+    match /calendar/{week} {
+      allow read, write: if isStaff();
+    }
+
     match /orders/{orderId} {
       allow read: if signedIn()
                   && (resource.data.userId == request.auth.uid || isStaff());

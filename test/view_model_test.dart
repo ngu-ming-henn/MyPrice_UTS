@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smartshop/core/constants.dart';
+import 'package:smartshop/models/money.dart';
 import 'package:smartshop/models/order.dart';
 import 'package:smartshop/models/product.dart';
+import 'package:smartshop/services/money_service.dart';
 import 'package:smartshop/services/order_service.dart';
 import 'package:smartshop/services/product_service.dart';
 import 'package:smartshop/viewmodels/staff/dashboard_view_model.dart';
@@ -45,6 +47,31 @@ class FakeOrders implements OrderService {
   Future<void> acceptAndPack(String orderId, {required String staffId}) async {
     await holdAccept?.future;
     accepted.add('$orderId by $staffId');
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Closings and Campus calendar the test controls.
+class FakeMoney implements MoneyService {
+  final closing = StreamController<DayClosing?>.broadcast();
+  final history = StreamController<List<DayClosing>>.broadcast();
+  final calendar = StreamController<Map<String, String>>.broadcast();
+  final saved = <DayClosing>[];
+
+  @override
+  Stream<DayClosing?> watchClosing(DateTime day) => closing.stream;
+  @override
+  Stream<List<DayClosing>> watchClosingsSince(DateTime since) => history.stream;
+  @override
+  Stream<Map<String, String>> watchCalendar() => calendar.stream;
+  @override
+  Future<DayClosing?> lastClosingBefore(DateTime day) async => null;
+  @override
+  Future<bool> saveClosing(DayClosing closing) async {
+    saved.add(closing);
+    return true;
   }
 
   @override
@@ -94,6 +121,7 @@ void main() {
     final vm = DashboardViewModel(
       products,
       orders,
+      FakeMoney(),
       'staff-1',
       now: DateTime(2026, 11, 13, 12),
     );
@@ -142,7 +170,12 @@ void main() {
 
   test('empty shop is offered the sample products', () async {
     final products = FakeProducts();
-    final vm = DashboardViewModel(products, FakeOrders(), 'staff-1');
+    final vm = DashboardViewModel(
+      products,
+      FakeOrders(),
+      FakeMoney(),
+      'staff-1',
+    );
     products.all.add(const []);
     await settle();
     expect(vm.shopIsEmpty, isTrue);

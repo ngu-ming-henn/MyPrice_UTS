@@ -37,6 +37,18 @@ String formatTime(DateTime d) => dateFormat('h:mm a').format(d);
 
 DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
+/// The Monday that starts the week of [d] (Campus calendar weeks).
+DateTime weekStart(DateTime d) =>
+    DateTime(d.year, d.month, d.day - (d.weekday - DateTime.monday));
+
+/// Document ID for one day, e.g. "2026-11-19" (closings, calendar weeks).
+String dayId(DateTime d) =>
+    '${d.year}-${d.month.toString().padLeft(2, '0')}-'
+    '${d.day.toString().padLeft(2, '0')}';
+
+/// Document ID of the Campus calendar week that contains [d].
+String weekId(DateTime d) => dayId(weekStart(d));
+
 /// Whole calendar days from [from] (default: today) until [date].
 /// Negative when [date] is in the past.
 int daysUntil(DateTime date, {DateTime? from}) {

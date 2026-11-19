@@ -1,4 +1,9 @@
+import 'dart:math';
+
+import '../core/constants.dart';
 import '../core/utils/codes.dart';
+import '../core/utils/format.dart';
+import '../models/money.dart';
 import '../models/product.dart';
 
 /// Demo catalogue for testing and the presentation. `sold` is a starting
@@ -466,4 +471,106 @@ List<Product> buildSampleProducts(DateTime now) {
       about: 'Fluoride toothpaste for fresh breath and strong teeth.',
     ),
   ];
+}
+
+/// Demo cost price (what the koperasi pays the supplier): about 70% of the
+/// selling price, rounded to 10 sen.
+int sampleCostSen(Product p) => (p.priceSen * 0.7 / 10).round() * 10;
+
+/// Demo history for the Money screen, the week comparison and the restock
+/// plan: 8 weeks of closed days before [today], with a semester break, an
+/// exam week and an event week marked in the Campus calendar, and an exam
+/// week coming up next week. Sales follow each product's popularity and the
+/// kind of week (exam weeks sell more drinks, snacks and stationery; the
+/// semester break sells little). The same numbers every time (fixed seed).
+({List<DayClosing> closings, Map<String, String> weekTypes}) buildSampleHistory(
+  DateTime today,
+  List<Product> products,
+  String staffId,
+) {
+  final monday = weekStart(today);
+  String week(int offset) =>
+      dayId(DateTime(monday.year, monday.month, monday.day + 7 * offset));
+  final weekTypes = {
+    week(-6): WeekType.semesterBreak,
+    week(-3): WeekType.exam,
+    week(-1): WeekType.event,
+    week(1): WeekType.exam,
+  };
+
+  double boost(String type, String category) => switch (type) {
+    WeekType.exam => switch (category) {
+      'Drinks' => 1.6,
+      'Snacks' => 1.5,
+      'Stationery' => 1.8,
+      'Food' => 1.3,
+      _ => 1.0,
+    },
+    WeekType.semesterBreak => 0.25,
+    WeekType.event => category == 'Others' ? 1.0 : 1.4,
+    _ => 1.0,
+  };
+
+  final random = Random(2026);
+  final closings = <DayClosing>[];
+  var index = 0;
+  for (var d = 56; d >= 1; d--) {
+    final day = DateTime(today.year, today.month, today.day - d);
+    if (!AppRules.openWeekdays.contains(day.weekday)) continue;
+    final type = weekTypeOf(day, weekTypes);
+    final lines = <String, ClosingLine>{};
+    var sales = 0, cost = 0, count = 0;
+    for (final p in products) {
+      final perDay = max(p.soldCount, 10) / 30;
+      final u =
+          (perDay * boost(type, p.category) * (0.75 + random.nextDouble() / 2))
+              .round();
+      if (u <= 0) continue;
+      lines[p.barcode] = ClosingLine(
+        name: p.name,
+        units: u,
+        salesSen: u * p.priceSen,
+        costSen: u * sampleCostSen(p),
+      );
+      sales += u * p.priceSen;
+      cost += u * sampleCostSen(p);
+      count += u;
+    }
+    final qr = (sales * 0.35 / 10).round() * 10;
+    const float = 5000;
+    // A few days where the drawer did not match, to show the warnings.
+    final difference = switch (index) {
+      9 => -240,
+      23 => 100,
+      31 => -150,
+      _ => 0,
+    };
+    closings.add(
+      DayClosing(
+        day: day,
+        salesSen: sales,
+        cashSen: sales - qr,
+        qrSen: qr,
+        costSen: cost,
+        profitSen: sales - cost,
+        orderCount: max(1, (count / 2.2).round()),
+        wasteSen: random.nextInt(5) * 70,
+        saveFoodSen: random.nextInt(6) * 100,
+        floatSen: float,
+        countedSen: float + sales - qr + difference,
+        products: lines,
+        closedBy: staffId,
+        closedAt: DateTime(
+          day.year,
+          day.month,
+          day.day,
+          18,
+          5 + random.nextInt(20),
+        ),
+        sample: true,
+      ),
+    );
+    index++;
+  }
+  return (closings: closings, weekTypes: weekTypes);
 }

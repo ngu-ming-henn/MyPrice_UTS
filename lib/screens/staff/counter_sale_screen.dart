@@ -7,6 +7,7 @@ import '../../core/utils/format.dart';
 import '../../l10n/strings.dart';
 import '../../viewmodels/staff/counter_sale_view_model.dart';
 import '../../widgets/common.dart';
+import '../../widgets/payment_dialog.dart';
 import '../../widgets/product_picker.dart';
 import '../../widgets/product_widgets.dart';
 import '../../widgets/scanner_view.dart';
@@ -56,7 +57,7 @@ class CounterSaleScreen extends StatelessWidget {
   Future<void> _checkout(BuildContext context) async {
     final vm = context.read<CounterSaleViewModel>();
     final cart = vm.cart;
-    final ok = await confirm(
+    final method = await askPayment(
       context,
       title: context.tr('Collect {total}', {'total': formatRM(cart.totalSen)}),
       message: [
@@ -67,14 +68,12 @@ class CounterSaleScreen extends StatelessWidget {
             'points': cart.pointsPreview,
           }),
         '\n\n',
-        context.tr('Take payment, then confirm.'),
+        context.tr('Take payment, then tap how they paid.'),
       ].join(),
-      confirmLabel: context.tr('Paid'),
-      cancelLabel: context.tr('Back'),
     );
-    if (!ok || !context.mounted) return;
+    if (method == null || !context.mounted) return;
     try {
-      final orderId = await vm.checkout();
+      final orderId = await vm.checkout(method);
       if (context.mounted) await context.push('/receipt/$orderId');
     } catch (e) {
       if (context.mounted) showError(context, e);

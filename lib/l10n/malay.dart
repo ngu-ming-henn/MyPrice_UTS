@@ -773,4 +773,167 @@ const malayStrings = <String, String>{
   'Map, opening hours, directions': 'Peta, waktu operasi, arah',
   '🍞 Save Food savings': '🍞 Penjimatan Save Food',
   '🌱 Green points to earn': '🌱 Mata hijau yang akan diperoleh',
+  // ------------------------------------------- owner: money and planning
+  'Normal week': 'Minggu biasa',
+  'Exam week': 'Minggu peperiksaan',
+  'Semester break': 'Cuti semester',
+  'Event week': 'Minggu acara',
+  'Cash': 'Tunai',
+  'DuitNow QR': 'DuitNow QR',
+  'Money': 'Wang',
+  'Count the cash and save the day':
+      'Kira wang tunai dan simpan ringkasan hari ini',
+  'What to order for the coming week':
+      'Apa yang perlu dipesan untuk minggu depan',
+  'Mark exam weeks, semester breaks and events':
+      'Tandakan minggu peperiksaan, cuti semester dan acara',
+  'Sales chart, top products, green impact':
+      'Carta jualan, produk teratas, kesan hijau',
+  'Load sample sales history': 'Muatkan sejarah jualan contoh',
+  'For the Money tab and the restock plan demo':
+      'Untuk demo tab Wang dan pelan tambah stok',
+  'Campus calendar': 'Kalendar kampus',
+  'Sales change a lot during exams and semester breaks. Mark the weeks once a semester: the restock plan orders for the week coming up, and Money compares them.':
+      'Jualan banyak berubah semasa peperiksaan dan cuti semester. Tandakan '
+      'minggu-minggu ini sekali setiap semester: pelan tambah stok memesan '
+      'untuk minggu yang akan datang, dan Wang membandingkannya.',
+  'Coming weeks': 'Minggu akan datang',
+  'Past weeks': 'Minggu lalu',
+  'Mark them so past sales can be compared':
+      'Tandakan supaya jualan lalu boleh dibandingkan',
+  'This week': 'Minggu ini',
+  'Kind of week': 'Jenis minggu',
+  'Cash is short by {amount}': 'Wang tunai kurang {amount}',
+  'There is {amount} too much': 'Terlebih {amount}',
+  'Count the drawer again, or close the shop and keep this difference in the closing history.':
+      'Kira laci sekali lagi, atau tutup kedai dan simpan perbezaan ini '
+      'dalam sejarah penutupan.',
+  'Close shop': 'Tutup kedai',
+  'Count again': 'Kira semula',
+  "Shop closed. Today's summary is saved.":
+      'Kedai ditutup. Ringkasan hari ini telah disimpan.',
+  "Shop closed. Today's summary is saved on this phone and will be sent when you are online.":
+      'Kedai ditutup. Ringkasan hari ini disimpan dalam telefon ini dan akan '
+      'dihantar apabila anda dalam talian.',
+  'Today so far': 'Hari ini setakat ini',
+  'Sales ({count} orders)': 'Jualan ({count} pesanan)',
+  'Cash sales': 'Jualan tunai',
+  'DuitNow QR (in the bank)': 'DuitNow QR (dalam bank)',
+  'Profit': 'Untung',
+  'Thrown away (at cost)': 'Dibuang (harga kos)',
+  '{count} item(s) sold have no cost price, so the profit leaves them out.':
+      '{count} barang yang dijual tiada harga kos, jadi tidak dikira dalam '
+      'untung.',
+  'Count the cash drawer': 'Kira laci wang tunai',
+  'Cash at opening (float)': 'Tunai semasa buka (wang tukar)',
+  'The change you put in the drawer this morning':
+      'Wang tukar yang anda letak dalam laci pagi tadi',
+  'Coins (total)': 'Syiling (jumlah)',
+  'Expected in drawer': 'Dijangka dalam laci',
+  'Counted': 'Dikira',
+  'Cash matches ✓': 'Tunai sepadan ✓',
+  'Difference': 'Perbezaan',
+  'Take payment, then tap how they paid.':
+      'Terima bayaran, kemudian ketik cara mereka membayar.',
+  'Take payment at the counter, then tap how they paid.':
+      'Terima bayaran di kaunter, kemudian ketik cara mereka membayar.',
+  'Shop closed at {time}': 'Kedai ditutup pada {time}',
+  'Sales {sales} · Profit {profit}': 'Jualan {sales} · Untung {profit}',
+  "It's closing time: close shop": 'Sudah waktu tutup: tutup kedai',
+  "Count the cash in the drawer and save today's summary.":
+      'Kira wang tunai dalam laci dan simpan ringkasan hari ini.',
+  'Restock plan: nothing to order':
+      'Pelan tambah stok: tiada yang perlu dipesan',
+  'Restock plan: {count} item(s) to order':
+      'Pelan tambah stok: {count} barang perlu dipesan',
+  '{week} from {date}': '{week} mulai {date}',
+  'For the next {days} days, from your sales history':
+      'Untuk {days} hari akan datang, daripada sejarah jualan anda',
+  'Close the shop every day to build the sales history.':
+      'Tutup kedai setiap hari untuk membina sejarah jualan.',
+  'Sales & sustainability report': 'Laporan jualan & kelestarian',
+  'Today': 'Hari ini',
+  '7 days': '7 hari',
+  '30 days': '30 hari',
+  'Cost': 'Kos',
+  'Profit ({pct}%)': 'Untung ({pct}%)',
+  '{count} orders · Cash {cash} · DuitNow QR {qr}':
+      '{count} pesanan · Tunai {cash} · DuitNow QR {qr}',
+  'Add cost prices in Products.': 'Tambah harga kos dalam Produk.',
+  'Daily profit (RM)': 'Untung harian (RM)',
+  'Sales minus cost price. Tap a bar for the exact amount.':
+      'Jualan tolak harga kos. Ketik bar untuk jumlah tepat.',
+  '💰 Earns the most': '💰 Paling menguntungkan',
+  'No sales with a cost price in this period yet.':
+      'Belum ada jualan dengan harga kos dalam tempoh ini.',
+  'Earns the least': 'Paling kurang untung',
+  '🗑️ Waste vs Save Food': '🗑️ Pembaziran vs Save Food',
+  'Lost: expired or damaged (at cost)':
+      'Rugi: tamat tempoh atau rosak (harga kos)',
+  'Saved: sold on Save Food instead': 'Diselamatkan: dijual melalui Save Food',
+  '📅 Campus weeks compared': '📅 Perbandingan minggu kampus',
+  'Closing history': 'Sejarah penutupan',
+  'Closing history · {count} day(s) short':
+      'Sejarah penutupan · {count} hari kurang',
+  'No closed days in this period.': 'Tiada hari ditutup dalam tempoh ini.',
+  'Tap "Close shop" on the Dashboard every evening.':
+      'Ketik "Tutup kedai" di Papan pemuka setiap petang.',
+  '{units} sold · {sales} · margin {pct}%':
+      '{units} dijual · {sales} · margin {pct}%',
+  'Mark exam weeks and semester breaks in the Campus calendar, and close the shop every day, to compare them here.':
+      'Tandakan minggu peperiksaan dan cuti semester dalam Kalendar kampus, '
+      'dan tutup kedai setiap hari, untuk membandingkannya di sini.',
+  '{days} days · sales {sales}/day': '{days} hari · jualan {sales}/hari',
+  '{profit}/day': '{profit}/hari',
+  '{pct}% vs normal': '{pct}% berbanding biasa',
+  'Average profit per open day, from the closed days.':
+      'Purata untung setiap hari buka, daripada hari yang ditutup.',
+  'Updated {count} sample products.': '{count} produk contoh dikemas kini.',
+  'Load sample sales history?': 'Muatkan sejarah jualan contoh?',
+  'Adds 8 weeks of sample closed days (marked "Sample") and marks a semester break, an exam week and an event week in the Campus calendar, plus an exam week next week. Load the sample products first. Days you closed yourself are kept.':
+      'Menambah 8 minggu hari tutup contoh (bertanda "Contoh") dan '
+      'menandakan cuti semester, minggu peperiksaan dan minggu acara dalam '
+      'Kalendar kampus, serta minggu peperiksaan minggu depan. Muatkan '
+      'produk contoh dahulu. Hari yang anda tutup sendiri dikekalkan.',
+  'Added {count} sample days. Open the Money tab.':
+      '{count} hari contoh ditambah. Buka tab Wang.',
+  'Cost price: what you pay the supplier. Only staff can see it.':
+      'Harga kos: harga yang anda bayar kepada pembekal. Hanya kakitangan '
+      'boleh melihatnya.',
+  'Profit {profit} per item ({pct}%)': 'Untung {profit} setiap barang ({pct}%)',
+  'Cost price': 'Harga kos',
+  'WhatsApp did not open. The order list is copied.':
+      'WhatsApp tidak dibuka. Senarai pesanan telah disalin.',
+  'Restock plan': 'Pelan tambah stok',
+  'Nothing to order': 'Tiada yang perlu dipesan',
+  'There is enough stock for the next {days} days.':
+      'Stok mencukupi untuk {days} hari akan datang.',
+  'Enough for the next {days} days plus the low-stock level. Pre-orders waiting to be packed are taken off the stock.':
+      'Cukup untuk {days} hari akan datang serta paras stok rendah. '
+      'Pra-tempahan yang belum dibungkus ditolak daripada stok.',
+  'Send {count} items on WhatsApp': 'Hantar {count} barang melalui WhatsApp',
+  'Normal weeks ahead': 'Minggu biasa akan datang',
+  'Forecast from {days} closed days of sales, by kind of campus week.':
+      'Ramalan daripada {days} hari jualan yang ditutup, mengikut jenis '
+      'minggu kampus.',
+  'No sales history yet: close the shop every day to build it. Until then, only low-stock items are listed.':
+      'Belum ada sejarah jualan: tutup kedai setiap hari untuk membinanya. '
+      'Sehingga itu, hanya barang stok rendah disenaraikan.',
+  '{pct}% in exam weeks': '{pct}% dalam minggu peperiksaan',
+  '{pct}% in semester breaks': '{pct}% dalam cuti semester',
+  '{pct}% in event weeks': '{pct}% dalam minggu acara',
+  '{stock} in stock · not selling lately':
+      '{stock} dalam stok · tidak laku kebelakangan ini',
+  '{stock} in stock · sells {rate}/day · {days} days left':
+      '{stock} dalam stok · laku {rate}/hari · tinggal {days} hari',
+  'Time to close shop 🔒': 'Masa untuk tutup kedai 🔒',
+  'Hi, an order from {shop} ({date}):':
+      'Hai, pesanan daripada {shop} ({date}):',
+  'Thank you!': 'Terima kasih!',
+  'Short {amount}': 'Kurang {amount}',
+  'Over {amount}': 'Lebih {amount}',
+  'Sample': 'Contoh',
+  'Closed at {time}': 'Ditutup pada {time}',
+  'Saved by Save Food': 'Diselamatkan oleh Save Food',
+  'Cash check': 'Semakan tunai',
 };

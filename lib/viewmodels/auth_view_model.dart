@@ -56,8 +56,19 @@ class AuthViewModel extends ChangeNotifier {
         .listen(
           (snap) {
             if (snap.exists) {
+              // Written on this phone but not accepted by the server yet
+              // (joining as staff, a new profile): wait for the server, so a
+              // refused write does not flash the next page and jump back.
+              if (snap.metadata.hasPendingWrites &&
+                  _status != AuthStatus.signedIn) {
+                return;
+              }
               _user = AppUser.fromDoc(snap);
               _setStatus(AuthStatus.signedIn);
+            } else if (_status == AuthStatus.profileMissing) {
+              // Still missing (e.g. a refused join was rolled back): stay on
+              // the page so its error message stays visible.
+              _user = null;
             } else if (_registering || snap.metadata.isFromCache) {
               // Not written yet / not confirmed by the server yet: keep waiting.
               _user = null;

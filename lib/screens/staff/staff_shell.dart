@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../l10n/strings.dart';
 
-/// Staff bottom bar: Dashboard · Stock · Orders · Reports · More.
+/// Staff bottom bar: Dashboard · Stock · Orders · Money · More.
 class StaffShell extends StatelessWidget {
   const StaffShell({super.key, required this.location, required this.child});
 
@@ -14,7 +14,7 @@ class StaffShell extends StatelessWidget {
     '/staff',
     '/staff/stock',
     '/staff/orders',
-    '/staff/reports',
+    '/staff/money',
     '/staff/more',
   ];
 
@@ -49,9 +49,9 @@ class StaffShell extends StatelessWidget {
             label: context.tr('Orders'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: context.tr('Reports'),
+            icon: Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: Icon(Icons.account_balance_wallet),
+            label: context.tr('Money'),
           ),
           NavigationDestination(
             icon: Icon(Icons.more_horiz),

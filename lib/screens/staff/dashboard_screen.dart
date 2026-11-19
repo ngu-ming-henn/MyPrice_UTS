@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants.dart';
 import '../../core/theme.dart';
 import '../../core/utils/format.dart';
 import '../../l10n/strings.dart';
 import '../../viewmodels/auth_view_model.dart';
 import '../../viewmodels/staff/dashboard_view_model.dart';
 import '../../widgets/brand.dart';
+import '../../widgets/closing_widgets.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
 
@@ -67,7 +69,7 @@ class DashboardScreen extends StatelessWidget {
                       value: formatRM(vm.salesTodaySen),
                       icon: Icons.payments_outlined,
                       color: context.brand,
-                      onTap: () => context.go('/staff/reports'),
+                      onTap: () => context.go('/staff/money'),
                     ),
                     StatCard(
                       label: context.tr('Pending orders · {ready} ready', {
@@ -94,6 +96,11 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(height: 12),
+              const FadeSlideIn(
+                delay: Duration(milliseconds: 80),
+                child: Column(children: [_CloseShopCard(), _RestockPlanCard()]),
               ),
               SectionHeader(title: context.tr('Quick actions')),
               FadeSlideIn(
@@ -177,6 +184,104 @@ class DashboardScreen extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// "Close shop" at the end of the day; once closed, the day's result.
+class _CloseShopCard extends StatelessWidget {
+  const _CloseShopCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<DashboardViewModel>();
+    if (!vm.closingLoaded) return const SizedBox.shrink();
+    final closed = vm.closedToday;
+    if (closed != null) {
+      return Card(
+        child: ListTile(
+          leading: Icon(Icons.lock, color: context.eco),
+          title: Text(
+            context.tr('Shop closed at {time}', {
+              'time': formatTime(closed.closedAt ?? DateTime.now()),
+            }),
+          ),
+          subtitle: Text(
+            context.tr('Sales {sales} · Profit {profit}', {
+              'sales': formatRM(closed.salesSen),
+              'profit': formatRM(closed.profitSen),
+            }),
+          ),
+          trailing: CashCheckPill(closing: closed, compact: true),
+          onTap: () => context.push('/staff/close'),
+        ),
+      );
+    }
+    final due = vm.closeShopDue;
+    return Card(
+      color: due ? AppColors.warning.withValues(alpha: 0.12) : null,
+      child: ListTile(
+        leading: Icon(
+          Icons.lock_clock,
+          color: due ? AppColors.warning : context.brand,
+        ),
+        title: Text(
+          due
+              ? context.tr("It's closing time: close shop")
+              : context.tr('Close shop'),
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          context.tr("Count the cash in the drawer and save today's summary."),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/staff/close'),
+      ),
+    );
+  }
+}
+
+/// What to order before the supplier comes, from the restock forecast.
+class _RestockPlanCard extends StatelessWidget {
+  const _RestockPlanCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<DashboardViewModel>();
+    if (vm.shopIsEmpty) return const SizedBox.shrink();
+    final plan = vm.restockPlan;
+    final count = plan.lines.length;
+    final special = plan.specialType;
+    final from = plan.specialFrom;
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.local_shipping_outlined, color: context.brand),
+        title: Text(
+          count == 0
+              ? context.tr('Restock plan: nothing to order')
+              : context.tr('Restock plan: {count} item(s) to order', {
+                  'count': count,
+                }),
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          special != null && from != null
+              ? context.tr('{week} from {date}', {
+                  'week': context.tr(WeekType.label(special)),
+                  'date': dateFormat('EEE d MMM').format(from),
+                })
+              : plan.hasHistory
+              ? context.tr(
+                  'For the next {days} days, from your sales history',
+                  {'days': AppRules.restockCoverDays},
+                )
+              : context.tr(
+                  'Close the shop every day to build the sales history.',
+                ),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/staff/restock'),
       ),
     );
   }

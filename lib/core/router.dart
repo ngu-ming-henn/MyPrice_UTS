@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/budget_planner_service.dart';
 import '../services/location_service.dart';
+import '../services/money_service.dart';
 import '../services/order_service.dart';
 import '../services/product_service.dart';
 import '../services/stock_service.dart';
@@ -13,14 +14,18 @@ import '../viewmodels/cart_view_model.dart';
 import '../viewmodels/common/order_view_model.dart';
 import '../viewmodels/shop_map_view_model.dart';
 import '../viewmodels/staff/alerts_view_model.dart';
+import '../viewmodels/staff/campus_calendar_view_model.dart';
+import '../viewmodels/staff/close_shop_view_model.dart';
 import '../viewmodels/staff/counter_sale_view_model.dart';
 import '../viewmodels/staff/dashboard_view_model.dart';
+import '../viewmodels/staff/money_view_model.dart';
 import '../viewmodels/staff/more_view_model.dart';
 import '../viewmodels/staff/orders_queue_view_model.dart';
 import '../viewmodels/staff/product_form_view_model.dart';
 import '../viewmodels/staff/products_view_model.dart';
 import '../viewmodels/staff/qr_label_view_model.dart';
 import '../viewmodels/staff/reports_view_model.dart';
+import '../viewmodels/staff/restock_view_model.dart';
 import '../viewmodels/staff/staff_accounts_view_model.dart';
 import '../viewmodels/staff/stock_view_model.dart';
 import '../viewmodels/student/budget_planner_view_model.dart';
@@ -43,14 +48,18 @@ import '../screens/common/scanner_page.dart';
 import '../screens/common/settings_screen.dart';
 import '../screens/common/shop_map_screen.dart';
 import '../screens/staff/alerts_screen.dart';
+import '../screens/staff/campus_calendar_screen.dart';
+import '../screens/staff/close_shop_screen.dart';
 import '../screens/staff/counter_sale_screen.dart';
 import '../screens/staff/dashboard_screen.dart';
+import '../screens/staff/money_screen.dart';
 import '../screens/staff/more_screen.dart';
 import '../screens/staff/orders_queue_screen.dart';
 import '../screens/staff/product_form_screen.dart';
 import '../screens/staff/products_screen.dart';
 import '../screens/staff/qr_label_screen.dart';
 import '../screens/staff/reports_screen.dart';
+import '../screens/staff/restock_screen.dart';
 import '../screens/staff/staff_accounts_screen.dart';
 import '../screens/staff/staff_shell.dart';
 import '../screens/staff/stock_screen.dart';
@@ -298,6 +307,7 @@ GoRouter createRouter(AuthViewModel auth, SplashGate splash) {
               (c) => DashboardViewModel(
                 c.read<ProductService>(),
                 c.read<OrderService>(),
+                c.read<MoneyService>(),
                 uid(),
               ),
               const DashboardScreen(),
@@ -322,23 +332,68 @@ GoRouter createRouter(AuthViewModel auth, SplashGate splash) {
             ),
           ),
           GoRoute(
-            path: '/staff/reports',
+            path: '/staff/money',
             builder: (_, _) => _mvvm(
-              (c) => ReportsViewModel(
+              (c) => MoneyViewModel(
                 c.read<OrderService>(),
                 c.read<StockService>(),
+                c.read<ProductService>(),
+                c.read<MoneyService>(),
               ),
-              const ReportsScreen(),
+              const MoneyScreen(),
             ),
           ),
           GoRoute(
             path: '/staff/more',
             builder: (_, _) => _mvvm(
-              (c) => MoreViewModel(c.read<ProductService>(), uid()),
+              (c) => MoreViewModel(
+                c.read<ProductService>(),
+                c.read<MoneyService>(),
+                uid(),
+              ),
               const MoreScreen(),
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/staff/reports',
+        builder: (_, _) => _mvvm(
+          (c) =>
+              ReportsViewModel(c.read<OrderService>(), c.read<StockService>()),
+          const ReportsScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/staff/close',
+        builder: (_, _) => _mvvm(
+          (c) => CloseShopViewModel(
+            c.read<OrderService>(),
+            c.read<StockService>(),
+            c.read<ProductService>(),
+            c.read<MoneyService>(),
+            uid(),
+          ),
+          const CloseShopScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/staff/restock',
+        builder: (_, _) => _mvvm(
+          (c) => RestockViewModel(
+            c.read<ProductService>(),
+            c.read<OrderService>(),
+            c.read<MoneyService>(),
+          ),
+          const RestockScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/staff/calendar',
+        builder: (_, _) => _mvvm(
+          (c) => CampusCalendarViewModel(c.read<MoneyService>()),
+          const CampusCalendarScreen(),
+        ),
       ),
       GoRoute(
         path: '/staff/products',

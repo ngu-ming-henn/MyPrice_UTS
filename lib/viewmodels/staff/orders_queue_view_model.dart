@@ -45,9 +45,16 @@ class OrdersQueueViewModel extends ViewModel {
   Future<void> accept(Order o) =>
       _forOrder(o.id, () => _orders.acceptAndPack(o.id, staffId: _staffId));
 
-  /// Paid at the counter: READY -> COLLECTED, green points added.
-  Future<void> collect(Order o) =>
-      _forOrder(o.id, () => _orders.markCollected(o.id, staffId: _staffId));
+  /// Paid at the counter by [paymentMethod]: READY -> COLLECTED, green
+  /// points added.
+  Future<void> collect(Order o, String paymentMethod) => _forOrder(
+    o.id,
+    () => _orders.markCollected(
+      o.id,
+      staffId: _staffId,
+      paymentMethod: paymentMethod,
+    ),
+  );
 
   /// Reject a pending order or cancel a ready one (stock goes back).
   Future<void> cancel(Order o) =>

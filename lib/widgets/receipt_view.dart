@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants.dart';
 import '../core/theme.dart';
 import '../core/utils/format.dart';
 import '../l10n/strings.dart';
@@ -126,7 +127,11 @@ class ReceiptView extends StatelessWidget {
             ),
             if (order.customerName != null)
               _row(context, context.tr('Customer'), order.customerName!),
-            _row(context, context.tr('Payment'), context.tr('Paid at counter')),
+            _row(
+              context,
+              context.tr('Payment'),
+              context.tr(PaymentMethod.label(order.paymentMethod)),
+            ),
             const Divider(height: 28),
             OrderItemsList(order: order),
             const SizedBox(height: 16),

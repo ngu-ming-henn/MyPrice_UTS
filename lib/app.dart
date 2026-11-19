@@ -13,6 +13,7 @@ import 'services/notification_watcher.dart';
 import 'viewmodels/settings_view_model.dart';
 import 'services/auth_service.dart';
 import 'services/budget_planner_service.dart';
+import 'services/money_service.dart';
 import 'services/order_service.dart';
 import 'services/product_service.dart';
 import 'services/stock_service.dart';
@@ -30,6 +31,7 @@ class _SmartShopAppState extends State<SmartShopApp> {
   final _productService = ProductService();
   final _stockService = StockService();
   final _orderService = OrderService();
+  final _moneyService = MoneyService();
   final _budgetPlanner = BudgetPlannerService();
   final _cart = CartViewModel();
   late final AuthViewModel _auth = AuthViewModel(_authService);
@@ -78,6 +80,7 @@ class _SmartShopAppState extends State<SmartShopApp> {
         Provider.value(value: _productService),
         Provider.value(value: _stockService),
         Provider.value(value: _orderService),
+        Provider.value(value: _moneyService),
         Provider.value(value: _budgetPlanner),
         ChangeNotifierProvider.value(value: _auth),
         ChangeNotifierProvider.value(value: _cart),

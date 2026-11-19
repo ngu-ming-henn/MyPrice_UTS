@@ -16,6 +16,11 @@ class ProductService {
   CollectionReference<Map<String, dynamic>> get _products =>
       _db.collection('products');
 
+  /// Cost prices live in their own collection that only staff can read, so
+  /// students never see the koperasi's margins.
+  CollectionReference<Map<String, dynamic>> get _costs =>
+      _db.collection('product_costs');
+
   List<Product> _toSortedList(QuerySnapshot<Map<String, dynamic>> snap) =>
       snap.docs.map(Product.fromDoc).toList()
         ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
@@ -48,12 +53,44 @@ class ProductService {
     return doc.exists ? Product.fromDoc(doc) : null;
   }
 
+  // ------------------------------------------------------------ cost prices
+
+  /// Cost price (sen) of every product that has one, by barcode. Staff only.
+  Stream<Map<String, int>> watchCostPrices() => _costs.snapshots().map(
+    (s) => {
+      for (final d in s.docs)
+        if (d.data()['costPriceSen'] is num)
+          d.id: (d.data()['costPriceSen'] as num).toInt(),
+    },
+  );
+
+  Future<int?> getCostPrice(String barcode) async {
+    if (!isValidProductCode(barcode)) return null;
+    final v = (await _costs.doc(barcode).get()).data()?['costPriceSen'];
+    return v is num ? v.toInt() : null;
+  }
+
+  void _writeCost(WriteBatch batch, String barcode, int? costPriceSen) {
+    final ref = _costs.doc(barcode);
+    if (costPriceSen == null) {
+      batch.delete(ref);
+    } else {
+      batch.set(ref, {
+        'costPriceSen': costPriceSen,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+  // --------------------------------------------------------------- products
+
   /// Creates a product. Opening stock (if any) is logged as a stock-in
   /// movement in the same batch.
   Future<void> createProduct(
     Product product, {
     required String staffId,
     String source = MovementSource.manual,
+    int? costPriceSen,
   }) async {
     if (!isValidProductCode(product.barcode)) {
       throw const AppException(
@@ -67,6 +104,7 @@ class ProductService {
       });
     }
     final batch = _db.batch()..set(ref, product.toNewMap());
+    if (costPriceSen != null) _writeCost(batch, product.barcode, costPriceSen);
     if (product.stock > 0) {
       batch.set(
         _db.collection('stock_movements').doc(),
@@ -85,9 +123,14 @@ class ProductService {
     await batch.commit();
   }
 
-  /// Updates details only; stock is changed through StockService.
-  Future<void> updateProduct(Product product) =>
-      _products.doc(product.barcode).update(product.toDetailsMap());
+  /// Updates details and the cost price (null removes it); stock is
+  /// changed through StockService.
+  Future<void> updateProduct(Product product, {int? costPriceSen}) {
+    final batch = _db.batch()
+      ..update(_products.doc(product.barcode), product.toDetailsMap());
+    _writeCost(batch, product.barcode, costPriceSen);
+    return batch.commit();
+  }
 
   Future<void> setActive(String barcode, bool active) => _products
       .doc(barcode)
@@ -111,19 +154,26 @@ class ProductService {
 
   /// Adds the demo catalogue (section 14: "create ~50 sample products").
   /// Existing products keep their stock and prices; sample products loaded
-  /// before descriptions existed get their description. Returns how many
-  /// products were added and how many got a description.
-  Future<({int added, int described})> seedSampleProducts(
+  /// before descriptions or cost prices existed get them. Returns how many
+  /// products were added, got a description and got a cost price.
+  Future<({int added, int described, int costed})> seedSampleProducts(
     String staffId,
   ) async {
     final existing = {
       for (final d in (await _products.get()).docs) d.id: d.data(),
     };
+    final costed = {for (final d in (await _costs.get()).docs) d.id};
     final batch = _db.batch();
     var added = 0;
     var described = 0;
+    var newCosts = 0;
     for (final p in buildSampleProducts(DateTime.now())) {
       final old = existing[p.barcode];
+      if (!costed.contains(p.barcode) &&
+          (old == null || old['priceSen'] == p.priceSen)) {
+        _writeCost(batch, p.barcode, sampleCostSen(p));
+        if (old != null) newCosts++;
+      }
       if (old != null) {
         // Only fill it in if staff have not renamed or described it.
         final hasText = ((old['description'] as String?) ?? '').trim() != '';
@@ -151,7 +201,7 @@ class ProductService {
       );
       added++;
     }
-    if (added + described > 0) await batch.commit();
-    return (added: added, described: described);
+    if (added + described + newCosts > 0) await batch.commit();
+    return (added: added, described: described, costed: newCosts);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../core/constants.dart';
 import '../core/utils/format.dart';
 import '../l10n/strings.dart';
 import '../models/app_user.dart';
@@ -34,7 +35,9 @@ class NotificationWatcher {
     unawaited(_notifications.requestPermission());
     if (user.isStaff) {
       _watchStock();
+      _remindToCloseShop();
     } else {
+      unawaited(_notifications.cancel(closeShopReminderId));
       _watchMyOrders(user.uid);
       _watchSaveFoodDeals();
     }
@@ -122,6 +125,20 @@ class NotificationWatcher {
   }
 
   // ------------------------------------------------------------------ staff
+
+  static const closeShopReminderId = 1800;
+
+  /// "Time to close shop" every day at closing time.
+  void _remindToCloseShop() {
+    unawaited(
+      _notifications.scheduleDaily(
+        id: closeShopReminderId,
+        hour: AppRules.closingHour,
+        title: tr('Time to close shop 🔒'),
+        body: tr("Count the cash in the drawer and save today's summary."),
+      ),
+    );
+  }
 
   void _watchStock() {
     Set<String>? previousLow;

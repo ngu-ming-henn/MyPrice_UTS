@@ -9,6 +9,7 @@ import '../../l10n/strings.dart';
 import '../../models/order.dart';
 import '../../viewmodels/staff/orders_queue_view_model.dart';
 import '../../widgets/common.dart';
+import '../../widgets/payment_dialog.dart';
 import '../../widgets/product_widgets.dart';
 import '../common/scanner_page.dart';
 
@@ -62,19 +63,17 @@ class _OrdersQueueScreenState extends State<OrdersQueueScreen> {
   }
 
   Future<void> _collect(Order o) async {
-    final ok = await confirm(
+    final method = await askPayment(
       context,
       title: context.tr('Collect {total}', {'total': formatRM(o.totalSen)}),
       message:
           '${o.customerName ?? context.tr('Customer')} · '
           '${context.tr('{count} item(s)', {'count': o.itemCount})}\n'
           '${context.tr('Pickup code {code}', {'code': o.pickupCode ?? '-'})}\n\n'
-          '${context.tr('Take payment at the counter, then confirm.')}',
-      confirmLabel: context.tr('Paid & collected'),
-      cancelLabel: context.tr('Back'),
+          '${context.tr('Take payment at the counter, then tap how they paid.')}',
     );
-    if (!ok || !mounted) return;
-    if (await _run(() => _vm.collect(o)) && mounted) {
+    if (method == null || !mounted) return;
+    if (await _run(() => _vm.collect(o, method)) && mounted) {
       await context.push('/receipt/${o.id}');
     }
   }

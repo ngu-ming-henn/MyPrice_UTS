@@ -48,10 +48,30 @@ Future<void> main() async {
   );
 
   final prefs = await SharedPreferences.getInstance();
+  await _freshOfflineCopyAfterSwitch(prefs);
   await initializeDateFormatting('ms'); // Malay month names
   await NotificationService.instance.init();
 
   runApp(SmartShopApp(prefs: prefs));
+}
+
+/// The phone keeps ONE offline copy of the database for this Firebase
+/// project, also when the app runs against the local emulators. Firestore
+/// keeps the copy it thinks is newer, so test data from the emulators could
+/// hide the real data (e.g. "your profile does not exist"). The copy is
+/// therefore emptied whenever the app switches between the real database
+/// and the emulators. Logins are kept; the data downloads again.
+Future<void> _freshOfflineCopyAfterSwitch(SharedPreferences prefs) async {
+  const key = 'firestoreBackend';
+  // "-2": also empties copies made before this check was added.
+  const backend = useFirebaseEmulator ? 'emulator-2' : 'live-2';
+  if (prefs.getString(key) == backend) return;
+  try {
+    await FirebaseFirestore.instance.clearPersistence();
+  } catch (e) {
+    debugPrint('Could not empty the offline copy: $e');
+  }
+  await prefs.setString(key, backend);
 }
 
 /// Shown instead of crashing when `flutterfire configure` has not been run.
